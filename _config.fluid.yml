@@ -1,0 +1,130 @@
+favicon: /img/avatar.jpg
+apple_touch_icon: /img/avatar.jpg
+navbar:
+  blog_title: 兰斤斤
+  ground_glass:
+    enable: true
+    px: 10
+    alpha: 0.94
+  menu:
+    - { key: home, link: /, icon: 'iconfont icon-home-fill' }
+    - { key: 笔记, link: /notes/, icon: 'iconfont icon-category-fill' }
+    - { key: archive, link: /archives/, icon: 'iconfont icon-archive-fill' }
+    - { key: about, link: /about/, icon: 'iconfont icon-user-fill' }
+font:
+  font_size: 17px
+  font_family: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif'
+  letter_spacing: 0.015em
+color:
+  body_bg_color: '#f3f6fb'
+  board_color: '#ffffff'
+  navbar_bg_color: '#243e67'
+  text_color: '#263b54'
+  sec_text_color: '#687b92'
+  post_text_color: '#30435a'
+  post_heading_color: '#213954'
+  post_link_color: '#316caf'
+  link_hover_color: '#417ec3'
+  line_color: '#e5ebf3'
+dark_mode:
+  enable: true
+  default: light
+fun_features:
+  typing:
+    enable: false
+  anchorjs:
+    enable: false
+  progressbar:
+    enable: false
+banner:
+  parallax: false
+scroll_down_arrow:
+  enable: false
+lazyload:
+  enable: false
+index:
+  banner_img: /img/furina-landscape.jpg
+  banner_img_height: 64
+  banner_mask_alpha: 0.15
+  slogan:
+    enable: false
+    text: ''
+  post_meta:
+    date: true
+    category: true
+    tag: false
+post:
+  banner_img: /img/furina-landscape.jpg
+  banner_img_height: 42
+  banner_mask_alpha: 0.35
+  meta:
+    date:
+      format: YYYY-MM-DD
+    wordcount:
+      enable: false
+    min2read:
+      enable: false
+  category_bar:
+    enable: false
+  toc:
+    enable: true
+    headingSelector: h2,h3
+  copyright:
+    enable: false
+  image_zoom:
+    enable: false
+  math:
+    enable: false
+  comments:
+    enable: false
+    type: giscus
+archive:
+  banner_img: /img/furina-landscape.jpg
+  banner_img_height: 42
+category:
+  banner_img: /img/furina-landscape.jpg
+  banner_img_height: 42
+tag:
+  banner_img: /img/furina-landscape.jpg
+  banner_img_height: 42
+about:
+  banner_img: /img/furina-landscape.jpg
+  banner_img_height: 42
+  avatar: /img/avatar.jpg
+  name: 兰斤斤
+  intro: ''
+  icons: []
+page:
+  banner_img: /img/furina-landscape.jpg
+  banner_img_height: 42
+page404:
+  banner_img: /img/furina-landscape.jpg
+  banner_img_height: 42
+  redirect_delay: 0
+links:
+  enable: false
+search:
+  enable: true
+  field: all
+  content: true
+footer:
+  content: '<div class="footer-credit"><a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a><span class="footer-heart" aria-hidden="true">♡</span><a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="noopener">Fluid</a></div>'
+custom_css:
+  - /vendor/katex/katex.min.css
+  - /css/custom.css
+custom_js:
+  - /js/custom.js
+static_prefix:
+  jquery: /vendor/jquery/
+  bootstrap: /vendor/bootstrap/
+  github_markdown: /vendor/github-markdown/
+  hint: /vendor/hint/
+  tocbot: /vendor/tocbot/
+  clipboard: /vendor/clipboard/
+giscus:
+  repo: ''
+  repo-id: ''
+  category: ''
+  category-id: ''
+  mapping: pathname
+  lang: zh-CN

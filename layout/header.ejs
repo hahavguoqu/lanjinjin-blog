@@ -1,0 +1,21 @@
+<% const home = is_home(); const heroTitle = home ? config.title : (page.title || page.subtitle); %>
+<div class="header-inner site-header <%= home ? 'site-header-home' : 'site-header-inner' %>">
+  <%- partial('_partials/header/navigation') %>
+  <div id="banner" class="banner site-banner">
+    <picture class="hero-picture">
+      <source media="(max-width: 767px)" srcset="<%= url_for('/img/furina-portrait.webp') %>">
+      <img src="<%= url_for('/img/furina-landscape.webp') %>" alt="" fetchpriority="high" width="2200" height="1238">
+    </picture>
+    <div class="full-bg-img">
+      <div class="mask flex-center">
+        <div class="banner-text text-center">
+          <h1 class="hero-title" aria-label="<%= heroTitle %>"><span class="typed-title" aria-hidden="true"><%= heroTitle %></span><span class="typing-cursor" aria-hidden="true">_</span></h1>
+          <% if (is_post()) { %><%- inject_point('postMetaTop') %><% } %>
+        </div>
+      </div>
+    </div>
+    <% if (home) { %>
+      <a class="hero-scroll" href="#board" aria-label="向下浏览"><svg viewBox="0 0 32 32" width="48" height="48" fill="none" aria-hidden="true"><path d="m7 12 9 9 9-9" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <% } %>
+  </div>
+</div>
