@@ -21,13 +21,15 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid 
 @keyframes arrow-bob { 0%, 100% { transform: translateY(-5px); opacity: .65; } 50% { transform: translateY(5px); opacity: 1; } }
 /* The image stays opaque. Only its overlay and the interface fade in. */
 .site-header .mask { transition: background-color .85s ease; }
-.home-entering #navbar, .home-entering #mobile-grid-menu,
+.home-entering #navbar,
 .home-entering .site-header .banner-text, .home-entering .hero-scroll,
 .home-entering main, .home-entering footer { opacity: 0; visibility: hidden; transition: opacity .7s ease, visibility .7s; }
 html.home-entering:not(.intro-backdrop) .site-header .mask { background-color: transparent; }
-.home-entering.intro-ui #navbar, .home-entering.intro-ui #mobile-grid-menu,
+.home-entering.intro-ui #navbar,
 .home-entering.intro-ui .site-header .banner-text, .home-entering.intro-ui .hero-scroll,
 .home-entering.intro-ui main, .home-entering.intro-ui footer { opacity: 1; visibility: visible; }
+/* The menu is controlled by its own open state, never by the page entrance. */
+#mobile-grid-menu:not(.show) { visibility: hidden; }
 .hero-description { font-size: 1.05rem; letter-spacing: .14em; margin-bottom: 1.9rem; }
 .hero-link { display: inline-block; color: #fff; padding: .5rem .1rem; border-bottom: 1px solid rgba(255,255,255,.65); font-size: .86rem; }
 .hero-link:hover { color: white; border-color: white; }
