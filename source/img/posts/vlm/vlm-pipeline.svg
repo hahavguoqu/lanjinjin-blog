@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 300" width="100%" role="img" aria-label="一张图片进入 VLM 的完整张量维度变化">
+  <defs>
+    <style>
+      .bg { fill: #ffffff; stroke: #dde5ef; stroke-width: 1; }
+      .title { font: 600 15px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #213954; }
+      .lbl { font: 600 13px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #252525; }
+      .sub { font: 400 11.5px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #526478; }
+      .mono { font: 500 11.5px Consolas, Menlo, monospace; fill: #2c4766; }
+      .arrow { stroke: #526478; stroke-width: 1.5; fill: none; marker-end: url(#ah); }
+      .box-blue { fill: #cbe3f3; stroke: #4878a6; stroke-width: 1.1; }
+      .box-green { fill: #cfe8db; stroke: #3e8363; stroke-width: 1.1; }
+      .box-amber { fill: #f7e5c3; stroke: #a87b2d; stroke-width: 1.1; }
+      .box-purple { fill: #e4daf2; stroke: #6f579e; stroke-width: 1.1; }
+      .box-gray { fill: #f3f6fb; stroke: #8aa0b8; stroke-width: 1; }
+    </style>
+    <marker id="ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#526478"/>
+    </marker>
+  </defs>
+
+  <rect x="1" y="1" width="858" height="298" rx="10" class="bg"/>
+  <text x="24" y="32" class="title">一张 336×336 图片进入标准三段式 VLM 的张量形状变化</text>
+  <text x="24" y="51" class="sub">示例配置：ViT-L/14（P=14, d_v=1024）+ 两层 MLP Projector + 8B LLM（d_llm=4096）</text>
+
+  <!-- Step 1: Image -->
+  <rect x="24" y="80" width="126" height="84" rx="8" class="box-gray"/>
+  <text x="87" y="106" text-anchor="middle" class="lbl">原始图片</text>
+  <text x="87" y="128" text-anchor="middle" class="mono">336 × 336 × 3</text>
+  <text x="87" y="149" text-anchor="middle" class="sub">连续像素矩阵</text>
+
+  <line x1="150" y1="122" x2="178" y2="122" class="arrow"/>
+
+  <!-- Step 2: Patchify + ViT -->
+  <rect x="182" y="80" width="152" height="84" rx="8" class="box-blue"/>
+  <text x="258" y="104" text-anchor="middle" class="lbl">Vision Encoder (ViT)</text>
+  <text x="258" y="125" text-anchor="middle" class="sub">切 14×14 patch → 24×24</text>
+  <text x="258" y="147" text-anchor="middle" class="mono">[576, 1024]</text>
+
+  <line x1="334" y1="122" x2="362" y2="122" class="arrow"/>
+
+  <!-- Step 3: Projector -->
+  <rect x="366" y="80" width="144" height="84" rx="8" class="box-amber"/>
+  <text x="438" y="104" text-anchor="middle" class="lbl">MLP Projector</text>
+  <text x="438" y="125" text-anchor="middle" class="sub">视觉空间 → 语言空间</text>
+  <text x="438" y="147" text-anchor="middle" class="mono">[576, 4096]</text>
+
+  <line x1="510" y1="122" x2="538" y2="122" class="arrow"/>
+
+  <!-- Step 4: Concat -->
+  <rect x="542" y="80" width="144" height="154" rx="8" class="box-purple"/>
+  <text x="614" y="104" text-anchor="middle" class="lbl">序列拼接</text>
+  <rect x="556" y="116" width="116" height="30" rx="5" fill="#cbe3f3" stroke="#4878a6"/>
+  <text x="614" y="135" text-anchor="middle" class="mono">576 视觉 token</text>
+  <rect x="556" y="154" width="116" height="30" rx="5" fill="#cfe8db" stroke="#3e8363"/>
+  <text x="614" y="173" text-anchor="middle" class="mono">10 文本 token</text>
+  <text x="614" y="212" text-anchor="middle" class="mono">[586, 4096]</text>
+
+  <!-- Text input branch -->
+  <rect x="366" y="186" width="144" height="52" rx="8" class="box-green"/>
+  <text x="438" y="208" text-anchor="middle" class="lbl">用户问题 Embedding</text>
+  <text x="438" y="227" text-anchor="middle" class="mono">[10, 4096]</text>
+  <line x1="510" y1="212" x2="538" y2="212" class="arrow"/>
+
+  <line x1="686" y1="156" x2="714" y2="156" class="arrow"/>
+
+  <!-- Step 5: LLM -->
+  <rect x="718" y="80" width="118" height="154" rx="8" class="box-green"/>
+  <text x="777" y="114" text-anchor="middle" class="lbl">LLM 解码器</text>
+  <text x="777" y="139" text-anchor="middle" class="sub">1. Prefill</text>
+  <text x="777" y="156" text-anchor="middle" class="mono">S = 586</text>
+  <line x1="734" y1="170" x2="820" y2="170" stroke="#78ad94" stroke-dasharray="3,3"/>
+  <text x="777" y="191" text-anchor="middle" class="sub">2. Decode</text>
+  <text x="777" y="210" text-anchor="middle" class="sub">逐 token 自回归</text>
+
+  <!-- Bottom note -->
+  <rect x="24" y="254" width="812" height="30" rx="6" fill="#f7f9fc" stroke="#e2e8f0"/>
+  <text x="38" y="273" class="sub">注意：同样 1 张图，若按动态分辨率切为 4 块局部图 + 1 张缩略图，视觉 token 会膨胀到 5×576 = 2880，直接拉高 LLM Prefill 计算与 KV Cache 占用。</text>
+</svg>

@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 300" width="100%" role="img" aria-label="Prefill 与 Decode 阶段的计算形态与硬件瓶颈对比">
+  <defs>
+    <style>
+      .bg { fill: #ffffff; stroke: #dde5ef; stroke-width: 1; }
+      .title { font: 600 15px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #213954; }
+      .h { font: 600 13.5px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #213954; }
+      .lbl { font: 600 12px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #252525; }
+      .sub { font: 400 11.5px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #526478; }
+      .mono { font: 500 11.5px Consolas, Menlo, monospace; fill: #2c4766; }
+      .panel { fill: #fafbfd; stroke: #d8e2ee; stroke-width: 1; }
+      .blue { fill: #cbe3f3; stroke: #4878a6; stroke-width: 1.1; }
+      .green { fill: #cfe8db; stroke: #3e8363; stroke-width: 1.1; }
+      .amber { fill: #f7e5c3; stroke: #a87b2d; stroke-width: 1.1; }
+      .red { fill: #fde2e1; stroke: #b85450; stroke-width: 1.1; }
+    </style>
+  </defs>
+
+  <rect x="1" y="1" width="858" height="298" rx="10" class="bg"/>
+  <text x="24" y="32" class="title">Prefill 与 Decode：同一个模型，两种完全相反的硬件负载</text>
+
+  <!-- Left Panel: Prefill -->
+  <rect x="24" y="50" width="394" height="228" rx="8" class="panel"/>
+  <text x="42" y="76" class="h">Prefill 阶段（算力受限 Compute-bound）</text>
+  <text x="42" y="95" class="sub">一次吃进全部 Prompt（S 个 token），并行算完并写入初始 KV Cache</text>
+
+  <!-- Matrix x Matrix -->
+  <rect x="44" y="114" width="76" height="66" rx="5" class="blue"/>
+  <text x="82" y="144" text-anchor="middle" class="lbl">Q_seq</text>
+  <text x="82" y="162" text-anchor="middle" class="mono">[S, D]</text>
+
+  <text x="134" y="152" text-anchor="middle" class="h">×</text>
+
+  <rect x="148" y="114" width="90" height="66" rx="5" class="green"/>
+  <text x="193" y="144" text-anchor="middle" class="lbl">K_seq^T</text>
+  <text x="193" y="162" text-anchor="middle" class="mono">[D, S]</text>
+
+  <text x="252" y="152" text-anchor="middle" class="h">=</text>
+
+  <rect x="266" y="114" width="132" height="66" rx="5" class="amber"/>
+  <text x="332" y="138" text-anchor="middle" class="lbl">GEMM 矩阵乘</text>
+  <text x="332" y="156" text-anchor="middle" class="mono">S × S 因果掩码</text>
+  <text x="332" y="172" text-anchor="middle" class="sub">Tensor Core 满载</text>
+
+  <rect x="42" y="198" width="358" height="64" rx="6" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="54" y="218" class="lbl">关键指标：TTFT（首字延迟）</text>
+  <text x="54" y="237" class="sub">算术强度高，权重读一次复用 S 次；长 Prompt 会直接拉高</text>
+  <text x="54" y="253" class="sub">TTFT，并在混合部署时阻塞同卡上正在 Decode 的请求。</text>
+
+  <!-- Right Panel: Decode -->
+  <rect x="442" y="50" width="394" height="228" rx="8" class="panel"/>
+  <text x="460" y="76" class="h">Decode 阶段（显存带宽受限 Memory-bound）</text>
+  <text x="460" y="95" class="sub">每步只新来 1 个 token，但必须从 HBM 搬出全部历史 KV</text>
+
+  <!-- Vector x Matrix -->
+  <rect x="462" y="134" width="66" height="26" rx="5" class="blue"/>
+  <text x="495" y="151" text-anchor="middle" class="mono">q_t [1,D]</text>
+
+  <text x="540" y="152" text-anchor="middle" class="h">×</text>
+
+  <rect x="552" y="114" width="108" height="66" rx="5" class="red"/>
+  <text x="606" y="140" text-anchor="middle" class="lbl">历史 K_cache^T</text>
+  <text x="606" y="158" text-anchor="middle" class="mono">[D, S+t]</text>
+  <text x="606" y="174" text-anchor="middle" class="sub">全量从 HBM 搬运</text>
+
+  <text x="673" y="152" text-anchor="middle" class="h">=</text>
+
+  <rect x="686" y="114" width="132" height="66" rx="5" class="amber"/>
+  <text x="752" y="138" text-anchor="middle" class="lbl">GEMV 矩阵-向量</text>
+  <text x="752" y="156" text-anchor="middle" class="mono">算力/带宽极低</text>
+  <text x="752" y="172" text-anchor="middle" class="sub">算力大量闲置等数据</text>
+
+  <rect x="460" y="198" width="358" height="64" rx="6" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="472" y="218" class="lbl">关键指标：ITL / TPOT（每 token 生成间隔）</text>
+  <text x="472" y="237" class="sub">单请求权重与 KV 搬运量远高于计算量；需靠大 Batch 摊薄</text>
+  <text x="472" y="253" class="sub">权重读取，但每条请求的 KV 独立，总 KV 搬运仍随 Batch 线性增。</text>
+</svg>

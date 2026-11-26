@@ -32,7 +32,7 @@ description: Transformer 论文（Attention Is All You Need）核心概念、架
 
 #### sequential computation
 
-​	The Extended Neural GPU,ByteNet and ConvS2S这些模型仍旧以CNN为基本模块（并非RNN时间序列模型），可以并行计算所有输入输出的隐藏表示，但是由于CNN的感受野有限，需要多层传播，所以在这些模型中还是会出现问题：将两个任意输入或输出位置的信号关联起来所需的运算量随着位置间距举例的增长而增加，即”**长度依赖问题**（long-range dependency）“。不过，这些CNN具有**多通道**的优良特性，Transformer在设计 multi-head attention的时候实际上就是实现了多通道的特性，具备了丰富的特征表达能力。
+​	The Extended Neural GPU,ByteNet and ConvS2S这些模型仍旧以CNN为基本模块（并非RNN时间序列模型），可以并行计算所有输入输出的隐藏表示，但是由于CNN的感受野有限，需要多层传播，所以在这些模型中还是会出现问题：将两个任意输入或输出位置的信号关联起来所需的运算量随着位置间距距离的增长而增加，即”**长距离依赖问题**（long-range dependency）“。不过，这些CNN具有**多通道**的优良特性，Transformer在设计 multi-head attention的时候实际上就是实现了多通道的特性，具备了丰富的特征表达能力。
 
 
 
@@ -73,7 +73,7 @@ $$
 
 自回归：在解码器逐步生成目标序列的时候，每一步生成一个符号，此时解码器会使用编码器生成的上下文信息和之前已经生成的目标序列的符号，即当前输出**依赖于之前**的输出。这样可以捕捉目标序列的前后依赖关系（如上下文信息），然而这**不方便并行化**计算，生成速度较慢。
 
-​	最原始transformer架构同样是采用编码器-解码器，而解码器也是使用自回归的。在编码器阶段使用自注意力机制，此时可以极大加快与逆行速度。而后有部分transformer架构采用非自回归结构，但是通常会产生精度较低的问题。
+​	最原始transformer架构同样是采用编码器-解码器，而解码器也是使用自回归的。在编码器阶段使用自注意力机制，此时可以极大加快运行速度。而后有部分transformer架构采用非自回归结构，但是通常会产生精度较低的问题。
 
 ​	由于传统transformer解码器采用自回归实现，所以模型在**推理**阶段的自回归生成会有速度瓶颈，这就是扩散LLM等模型研究的动因之一。
 
@@ -139,7 +139,10 @@ $$
 
 **公式：**
 $$
-PE_{(pos,2i)}=sin(pos/10000^{2i/d_{\mathrm{model}}})\\PE_{(pos,2i+1)}=cos(pos/10000^{2i/d_{\mathrm{model}}})
+\begin{aligned}
+PE_{(pos,2i)} &= \sin(pos/10000^{2i/d_{\mathrm{model}}}) \\
+PE_{(pos,2i+1)} &= \cos(pos/10000^{2i/d_{\mathrm{model}}})
+\end{aligned}
 $$
 其中：
 
@@ -182,7 +185,7 @@ $$
 | $pos_8$ | 0.989358  | -0.145500 | 0.079992 | 0.996800 | 0.000800 | 1.000000 | 0.000011 | 1.000000 |
 | $pos_9$ | 0.412118  | -0.911130 | 0.089991 | 0.995950 | 0.000900 | 1.000000 | 0.000013 | 1.000000 |
 
-​	这组公式表示**绝对位置**，同时也能隐式地表示**相对位置**。将每组 $i$ 想象成一个在坐标系上的**圆**$(\sin(\frac{pos}{K_{i}}),\cos(\frac{pos}{K_{i}}))$，pos不断增加相当于这个圆的角度在以一个固定值增大旋转，所以$PE(pos+\Delta)=\mathcal{R}(\Delta)\:PE(pos)$中的$\mathcal{R}(\Delta)\:$仅取决于相对位置差，同时会有216组 $i$ 的数据，所以不用担心周期性问题。注意，这只是辅助理解方式，transformer并**不会显式**计算这个旋转矩阵，它依赖注意力和线性层隐式捕获。理论上网络可以学习通过线性映射捕捉相对位置信息，但实际上效果如何并不好说，可能不稳定。后续模型在针对**极长序列**或者更加关注**相对位置**的时候，会考虑使用其他的位置编码方式。
+​	这组公式表示**绝对位置**，同时也能隐式地表示**相对位置**。将每组 $i$ 想象成一个在坐标系上的**圆**$(\sin(\frac{pos}{K_{i}}),\cos(\frac{pos}{K_{i}}))$，pos不断增加相当于这个圆的角度在以一个固定值增大旋转，所以$PE(pos+\Delta)=\mathcal{R}(\Delta)\:PE(pos)$中的$\mathcal{R}(\Delta)\:$仅取决于相对位置差，同时会有256组 $i$ 的数据，所以不用担心周期性问题。注意，这只是辅助理解方式，transformer并**不会显式**计算这个旋转矩阵，它依赖注意力和线性层隐式捕获。理论上网络可以学习通过线性映射捕捉相对位置信息，但实际上效果如何并不好说，可能不稳定。后续模型在针对**极长序列**或者更加关注**相对位置**的时候，会考虑使用其他的位置编码方式。
 
 ##### 优势：
 
@@ -233,7 +236,7 @@ $$
 
 ​	While for small values of  $d_{k}$  the two mechanisms perform similarly, additive attention outperforms dot product attention without scaling for larger values of  $d_{k}$ . We suspect that for large values of  $d_{k}$ , the dot products grow large in magnitude, pushing the softmax function into regions where it has extremely small gradients. To counteract this effect, we scale the dot products by  $\frac{1}{\sqrt{d_k}}$ .
 
-​	当$d_{k}$取值较小时，两种注意力机制表现相近；但在$d_{k}$较大时，采用缩放因子的加性注意力要优于未缩放的点积注意力。我们认为当$d_{k}$较大时，点积的幅值会显著增大，从而将softmax函数推入梯度极小的饱和区间。为抵消这一影响，我们将点积结果缩放$\frac{1}{\sqrt{d_k}}$倍。
+​	当$d_{k}$取值较小时，两种注意力机制表现相近；但在$d_{k}$较大时，加性注意力要优于未缩放的点积注意力。我们认为当$d_{k}$较大时，点积的幅值会显著增大，从而将softmax函数推入梯度极小的饱和区间。为抵消这一影响，我们将点积结果缩放$\frac{1}{\sqrt{d_k}}$倍。
 
 ##### 解释：
 
@@ -257,13 +260,16 @@ $$
 
 ​	多头注意力机制使模型能够在**不同的位置**上**同时**关注来自**不同表示子空间**的信息。如果只有单个注意力头，那么这种能力会因为**平均化而受到抑制**。
 $$
-\mathrm{MultiHead}(Q,K,V)=\mathrm{Concat}(\mathrm{head}_{1},...,\mathrm{head}_{\mathrm{h}})W^{O}\\\mathrm{where~head_{\mathrm{i}}}=\mathrm{Attention}(QW_{i}^{Q},KW_{i}^{K},VW_{i}^{V})
+\begin{aligned}
+\mathrm{MultiHead}(Q,K,V) &= \mathrm{Concat}(\mathrm{head}_{1},\dots,\mathrm{head}_{h})W^{O} \\
+\mathrm{where\ head}_{i} &= \mathrm{Attention}(QW_{i}^{Q},KW_{i}^{K},VW_{i}^{V})
+\end{aligned}
 $$
-​	在这里个 $head_i$的输出维度是 $d_v$，拼接后得到维度$h \times d_v$，$W^O \in \mathbb{R}^{(h d_v) \times d_{model}}$是一个**可学习**的线性变换矩阵,这一层只是将多头输出重新**映射回**模型维度 $d_{model}$，以便和后续层对齐。
+​	这里每个 $head_i$ 的输出维度是 $d_v$，拼接后得到维度$h \times d_v$，$W^O \in \mathbb{R}^{(h d_v) \times d_{model}}$是一个**可学习**的线性变换矩阵,这一层只是将多头输出重新**映射回**模型维度 $d_{model}$，以便和后续层对齐。
 
 ![multi_head_attention_block](/img/posts/transformer/multi_head_attention_block.png)
 
-​	这里的**Add**就是残差连接（Residual Connection，和ResNet的思想一脉相承），即 $x\ +\ MHA(x)$。让子层学习的是输入的增量变化量，而**不是完全重构特征**，有助于transformer的**稳定训练**，让输入$x$至少保留原始性息$x$避免丢失。
+​	这里的**Add**就是残差连接（Residual Connection，和ResNet的思想一脉相承），即 $x\ +\ MHA(x)$。让子层学习的是输入的增量变化量，而**不是完全重构特征**，有助于transformer的**稳定训练**，让输入$x$至少保留原始信息$x$避免丢失。
 
 ​	而**Norm**就是层归一化（LayerNorm），标准化输出保证分布**保持均匀**，还是稳定训练的意义。
 $$
@@ -281,7 +287,11 @@ $$
 
 ​	首先是会有一个输入 $X$,而在编码器和解码器中都有multi-head attention机制，结构基本相似，但是发挥的作用和输入输出是不一样的。我们需要对 $X$ 做三个**不同**的**线性变换**。
 $$
-Q=XW^Q\\K=XW^K\\V=XW^V
+\begin{aligned}
+Q &= XW^Q \\
+K &= XW^K \\
+V &= XW^V
+\end{aligned}
 $$
 其中：$W^Q,W^K\in\mathbb{R}^{d_{\mathrm{model}}\times d_k}$，且$W^V\in\mathbb{R}^{d_{\mathrm{model}}\times d_v}$，$W^Q,W^K,W^V$都是**可学习**矩阵，这里是一种**降维**操作。
 
@@ -303,7 +313,7 @@ $$
 
 ​	**多角度**捕捉信息，不同头关注不同类型的依赖（因为存在随机的初始化、位置编码、dropout等众多原因），增强表达能力。
 
-##### 不同位置的应用（appilcations）
+##### 不同位置的应用（applications）
 
 The Transformer uses multi-head attention in three different ways:
 
@@ -368,9 +378,9 @@ $$
 $$
 \mathrm{FFN}(x)=\max(0,xW_1+b_1)W_2+b_2
 $$
-​	While the linear transformations are the same across different positions, they use different parameters from layer to layer. Another way of describing this is as two convolutions with kernel size 1. The dimensionality of input and output is $\text{model} = 512$, and the inner-layer has dimensionality $d_\text{ff} = 2048$.
+​	While the linear transformations are the same across different positions, they use different parameters from layer to layer. Another way of describing this is as two convolutions with kernel size 1. The dimensionality of input and output is $d_{\text{model}} = 512$, and the inner-layer has dimensionality $d_\text{ff} = 2048$.
 
-​	虽然线性变换在不同位置上相同，但不同层使用的参数不同（Transformer 有 **L 层** Encoder/Decoder，每层都有自己的 FFN）。另一种描述方式是，这相当于两个卷积核大小为 1 的卷积操作（意思就是与位置无关，不考虑上下文连接）。输入和输出的维度为 $\text{model} = 512$，中间层的维度为 $d_\text{ff} = 2048$（即FFN 第一层线性升维到 $d_\text{ff} = 2048$ → ReLU → 第二层线性降回 512）。
+​	虽然线性变换在不同位置上相同，但不同层使用的参数不同（Transformer 有 **L 层** Encoder/Decoder，每层都有自己的 FFN）。另一种描述方式是，这相当于两个卷积核大小为 1 的卷积操作（意思就是与位置无关，不考虑上下文连接）。输入和输出的维度为 $d_{\text{model}} = 512$，中间层的维度为 $d_\text{ff} = 2048$（即FFN 第一层线性升维到 $d_\text{ff} = 2048$ → ReLU → 第二层线性降回 512）。
 
 ##### FFN维度大小具体变化
 
@@ -386,7 +396,7 @@ $X W_1 + b_1$
 第一层线性：**升维** 512 → 2048
 
 **2.ReLU 激活**
-$\text{H} = \text{ReLU}(X W_1 + b_1$
+$\text{H} = \text{ReLU}(X W_1 + b_1)$
 
 - 维度不变：$n \times 2048$
 - 激活只改变数值，不改变矩阵形状
@@ -404,7 +414,7 @@ $\text{H} = \text{ReLU}(X W_1 + b_1$
 
 #### 最后的Linear&softmax
 
-​	在所有Decoder之后，我们得到最终矩阵:$H\in\mathbb{R}^{n\times d_{\mathrm{model}}}$，但是这个矩阵还不是**词概率分布**，只是每个 token 的**向量表示**。最后使用一个全连接层（Linear）将 $d_\text{model}$ 映射到 **词表大小 |V|**：$Z=HW_o+b_o$。其中：$W_o\in\mathbb{R}d_{\mathrm{model}}\times|V|$。这一步就是将**连续的向量空间**转换成**离散的token空间**。
+​	在所有Decoder之后，我们得到最终矩阵:$H\in\mathbb{R}^{n\times d_{\mathrm{model}}}$，但是这个矩阵还不是**词概率分布**，只是每个 token 的**向量表示**。最后使用一个全连接层（Linear）将 $d_\text{model}$ 映射到 **词表大小 |V|**：$Z=HW_o+b_o$。其中：$W_o\in\mathbb{R}^{d_{\mathrm{model}}\times|V|}$。这一步就是将**连续的向量空间**转换成**离散的token空间**。
 
 ​	在最后进行softmax。如果是**训练**阶段，即用于计算**交叉熵损失**；如果是**推理**阶段，用于选择贪婪搜索或者采样或者Beam Search。
 

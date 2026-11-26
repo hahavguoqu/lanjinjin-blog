@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 300" width="100%" role="img" aria-label="PagedAttention 块表映射与 Prefix Cache 共享机制">
+  <defs>
+    <style>
+      .bg { fill: #ffffff; stroke: #dde5ef; stroke-width: 1; }
+      .title { font: 600 15px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #213954; }
+      .h { font: 600 12.5px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #213954; }
+      .lbl { font: 600 11.5px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #252525; }
+      .sub { font: 400 11px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #526478; }
+      .mono { font: 500 11px Consolas, Menlo, monospace; fill: #2c4766; }
+      .shared { fill: #cbe3f3; stroke: #4878a6; stroke-width: 1.2; }
+      .reqA { fill: #cfe8db; stroke: #3e8363; stroke-width: 1.2; }
+      .reqB { fill: #f7e5c3; stroke: #a87b2d; stroke-width: 1.2; }
+      .free { fill: #f1f5f9; stroke: #94a3b8; stroke-width: 1; stroke-dasharray: 4,3; }
+      .tbl { fill: #fafbfd; stroke: #cbd5e1; stroke-width: 1; }
+      .arrA { stroke: #3e8363; stroke-width: 1.4; fill: none; marker-end: url(#ag); }
+      .arrB { stroke: #a87b2d; stroke-width: 1.4; fill: none; marker-end: url(#aa); }
+      .arrS { stroke: #4878a6; stroke-width: 1.4; fill: none; marker-end: url(#ab); }
+    </style>
+    <marker id="ab" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="#4878a6"/></marker>
+    <marker id="ag" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="#3e8363"/></marker>
+    <marker id="aa" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="#a87b2d"/></marker>
+  </defs>
+
+  <rect x="1" y="1" width="858" height="298" rx="10" class="bg"/>
+  <text x="24" y="32" class="title">PagedAttention 与 Prefix Cache：逻辑连续、物理分散、前缀只存一份</text>
+
+  <!-- Request A Logical -->
+  <text x="28" y="66" class="h">请求 A（共享 System Prompt + 问题 A）</text>
+  <rect x="28" y="76" width="90" height="36" rx="5" class="shared"/>
+  <text x="73" y="92" text-anchor="middle" class="lbl">逻辑块 0</text>
+  <text x="73" y="106" text-anchor="middle" class="sub">Sys Prompt</text>
+
+  <rect x="124" y="76" width="90" height="36" rx="5" class="shared"/>
+  <text x="169" y="92" text-anchor="middle" class="lbl">逻辑块 1</text>
+  <text x="169" y="106" text-anchor="middle" class="sub">Sys Prompt</text>
+
+  <rect x="220" y="76" width="90" height="36" rx="5" class="reqA"/>
+  <text x="265" y="92" text-anchor="middle" class="lbl">逻辑块 2</text>
+  <text x="265" y="106" text-anchor="middle" class="sub">问题 A + 生成</text>
+
+  <!-- Request A Block Table -->
+  <rect x="334" y="68" width="136" height="58" rx="6" class="tbl"/>
+  <text x="402" y="86" text-anchor="middle" class="h">Block Table A</text>
+  <text x="402" y="104" text-anchor="middle" class="mono">0→P1  1→P4  2→P2</text>
+  <text x="402" y="120" text-anchor="middle" class="sub">映射到物理块编号</text>
+
+  <!-- Request B Logical -->
+  <text x="28" y="168" class="h">请求 B（相同 System Prompt + 问题 B）</text>
+  <rect x="28" y="178" width="90" height="36" rx="5" class="shared"/>
+  <text x="73" y="194" text-anchor="middle" class="lbl">逻辑块 0</text>
+  <text x="73" y="208" text-anchor="middle" class="sub">Sys Prompt</text>
+
+  <rect x="124" y="178" width="90" height="36" rx="5" class="shared"/>
+  <text x="169" y="194" text-anchor="middle" class="lbl">逻辑块 1</text>
+  <text x="169" y="208" text-anchor="middle" class="sub">Sys Prompt</text>
+
+  <rect x="220" y="178" width="90" height="36" rx="5" class="reqB"/>
+  <text x="265" y="194" text-anchor="middle" class="lbl">逻辑块 2</text>
+  <text x="265" y="208" text-anchor="middle" class="sub">问题 B + 生成</text>
+
+  <!-- Request B Block Table -->
+  <rect x="334" y="170" width="136" height="58" rx="6" class="tbl"/>
+  <text x="402" y="188" text-anchor="middle" class="h">Block Table B</text>
+  <text x="402" y="206" text-anchor="middle" class="mono">0→P1  1→P4  2→P5</text>
+  <text x="402" y="222" text-anchor="middle" class="sub">前两块直接复用</text>
+
+  <!-- Physical HBM Pool -->
+  <rect x="526" y="54" width="310" height="184" rx="8" class="tbl"/>
+  <text x="681" y="76" text-anchor="middle" class="h">GPU HBM 物理块池（不要求连续）</text>
+
+  <rect x="542" y="90" width="84" height="58" rx="5" class="free"/>
+  <text x="584" y="114" text-anchor="middle" class="mono">P0</text>
+  <text x="584" y="132" text-anchor="middle" class="sub">空闲块</text>
+
+  <rect x="638" y="90" width="84" height="58" rx="5" class="shared"/>
+  <text x="680" y="110" text-anchor="middle" class="mono">P1 (共享)</text>
+  <text x="680" y="126" text-anchor="middle" class="sub">Sys 块 0</text>
+  <text x="680" y="141" text-anchor="middle" class="mono">ref = 2</text>
+
+  <rect x="734" y="90" width="84" height="58" rx="5" class="reqA"/>
+  <text x="776" y="110" text-anchor="middle" class="mono">P2 (A独享)</text>
+  <text x="776" y="126" text-anchor="middle" class="sub">问题 A</text>
+  <text x="776" y="141" text-anchor="middle" class="mono">ref = 1</text>
+
+  <rect x="542" y="162" width="84" height="58" rx="5" class="free"/>
+  <text x="584" y="186" text-anchor="middle" class="mono">P3</text>
+  <text x="584" y="204" text-anchor="middle" class="sub">空闲块</text>
+
+  <rect x="638" y="162" width="84" height="58" rx="5" class="shared"/>
+  <text x="680" y="182" text-anchor="middle" class="mono">P4 (共享)</text>
+  <text x="680" y="198" text-anchor="middle" class="sub">Sys 块 1</text>
+  <text x="680" y="213" text-anchor="middle" class="mono">ref = 2</text>
+
+  <rect x="734" y="162" width="84" height="58" rx="5" class="reqB"/>
+  <text x="776" y="182" text-anchor="middle" class="mono">P5 (B独享)</text>
+  <text x="776" y="198" text-anchor="middle" class="sub">问题 B</text>
+  <text x="776" y="213" text-anchor="middle" class="mono">ref = 1</text>
+
+  <!-- Mapping arrows -->
+  <path d="M 470 90 C 500 90, 500 112, 524 112" class="arrS"/>
+  <path d="M 470 108 C 500 108, 500 132, 524 132" class="arrA"/>
+  <path d="M 470 190 C 500 190, 500 180, 524 180" class="arrS"/>
+  <path d="M 470 208 C 500 208, 500 202, 524 202" class="arrB"/>
+
+  <!-- Bottom note -->
+  <rect x="24" y="254" width="812" height="30" rx="6" fill="#f7f9fc" stroke="#e2e8f0"/>
+  <text x="38" y="273" class="sub">当请求需要修改共享的未满尾块时触发 Copy-on-Write：复制出新物理块再写入，保证其他请求的共享前缀不被污染。</text>
+</svg>

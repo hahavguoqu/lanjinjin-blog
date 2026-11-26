@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 315" width="100%" role="img" aria-label="MHA、GQA、MQA 与 MLA 单 token KV 缓存结构对比">
+  <defs>
+    <style>
+      .bg { fill: #ffffff; stroke: #dde5ef; stroke-width: 1; }
+      .title { font: 600 15px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #213954; }
+      .h { font: 600 13px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #213954; }
+      .lbl { font: 600 11px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #252525; }
+      .sub { font: 400 11px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #526478; }
+      .mono { font: 500 11px Consolas, Menlo, monospace; fill: #2c4766; }
+      .card { fill: #fafbfd; stroke: #d8e2ee; stroke-width: 1; }
+      .q { fill: #cbe3f3; stroke: #4878a6; stroke-width: 1; }
+      .k { fill: #cfe8db; stroke: #3e8363; stroke-width: 1; }
+      .v { fill: #f7e5c3; stroke: #a87b2d; stroke-width: 1; }
+      .lat { fill: #e4daf2; stroke: #6f579e; stroke-width: 1.1; }
+    </style>
+  </defs>
+
+  <rect x="1" y="1" width="858" height="313" rx="10" class="bg"/>
+  <text x="24" y="32" class="title">模型架构如何从源头压缩 KV Cache：MHA → GQA → MQA → MLA</text>
+
+  <!-- 1. MHA -->
+  <rect x="24" y="50" width="192" height="242" rx="8" class="card"/>
+  <text x="120" y="73" text-anchor="middle" class="h">MHA（标准多头）</text>
+  <text x="120" y="90" text-anchor="middle" class="sub">H_kv = H_q（如 GPT-3）</text>
+  <!-- 4 Q, 4 K, 4 V -->
+  <g transform="translate(38,104)">
+    <rect x="0" y="0" width="34" height="20" rx="3" class="q"/><text x="17" y="14" text-anchor="middle" class="lbl">Q1</text>
+    <rect x="42" y="0" width="34" height="20" rx="3" class="q"/><text x="59" y="14" text-anchor="middle" class="lbl">Q2</text>
+    <rect x="84" y="0" width="34" height="20" rx="3" class="q"/><text x="101" y="14" text-anchor="middle" class="lbl">Q3</text>
+    <rect x="126" y="0" width="34" height="20" rx="3" class="q"/><text x="143" y="14" text-anchor="middle" class="lbl">Q4</text>
+
+    <rect x="0" y="34" width="34" height="20" rx="3" class="k"/><text x="17" y="48" text-anchor="middle" class="lbl">K1</text>
+    <rect x="42" y="34" width="34" height="20" rx="3" class="k"/><text x="59" y="48" text-anchor="middle" class="lbl">K2</text>
+    <rect x="84" y="34" width="34" height="20" rx="3" class="k"/><text x="101" y="48" text-anchor="middle" class="lbl">K3</text>
+    <rect x="126" y="34" width="34" height="20" rx="3" class="k"/><text x="143" y="48" text-anchor="middle" class="lbl">K4</text>
+
+    <rect x="0" y="60" width="34" height="20" rx="3" class="v"/><text x="17" y="74" text-anchor="middle" class="lbl">V1</text>
+    <rect x="42" y="60" width="34" height="20" rx="3" class="v"/><text x="59" y="74" text-anchor="middle" class="lbl">V2</text>
+    <rect x="84" y="60" width="34" height="20" rx="3" class="v"/><text x="101" y="74" text-anchor="middle" class="lbl">V3</text>
+    <rect x="126" y="60" width="34" height="20" rx="3" class="v"/><text x="143" y="74" text-anchor="middle" class="lbl">V4</text>
+  </g>
+  <text x="120" y="216" text-anchor="middle" class="mono">每层缓存：2 × H_q × D</text>
+  <text x="120" y="242" text-anchor="middle" class="sub">每个 Q 头独享 K、V</text>
+  <text x="120" y="260" text-anchor="middle" class="sub">表达力最强，但 KV 最大</text>
+  <text x="120" y="278" text-anchor="middle" class="mono">GPT-3 175B: 4.5 MB/tok</text>
+
+  <!-- 2. GQA -->
+  <rect x="230" y="50" width="192" height="242" rx="8" class="card"/>
+  <text x="326" y="73" text-anchor="middle" class="h">GQA（分组共享）</text>
+  <text x="326" y="90" text-anchor="middle" class="sub">H_kv &lt; H_q（Llama 3 / Qwen）</text>
+  <g transform="translate(244,104)">
+    <rect x="0" y="0" width="34" height="20" rx="3" class="q"/><text x="17" y="14" text-anchor="middle" class="lbl">Q1</text>
+    <rect x="42" y="0" width="34" height="20" rx="3" class="q"/><text x="59" y="14" text-anchor="middle" class="lbl">Q2</text>
+    <rect x="84" y="0" width="34" height="20" rx="3" class="q"/><text x="101" y="14" text-anchor="middle" class="lbl">Q3</text>
+    <rect x="126" y="0" width="34" height="20" rx="3" class="q"/><text x="143" y="14" text-anchor="middle" class="lbl">Q4</text>
+
+    <rect x="18" y="34" width="42" height="20" rx="3" class="k"/><text x="39" y="48" text-anchor="middle" class="lbl">K_g1</text>
+    <rect x="102" y="34" width="42" height="20" rx="3" class="k"/><text x="123" y="48" text-anchor="middle" class="lbl">K_g2</text>
+
+    <rect x="18" y="60" width="42" height="20" rx="3" class="v"/><text x="39" y="74" text-anchor="middle" class="lbl">V_g1</text>
+    <rect x="102" y="60" width="42" height="20" rx="3" class="v"/><text x="123" y="74" text-anchor="middle" class="lbl">V_g2</text>
+  </g>
+  <text x="326" y="216" text-anchor="middle" class="mono">每层缓存：2 × H_kv × D</text>
+  <text x="326" y="242" text-anchor="middle" class="sub">每组 Q 头共享 1 组 K、V</text>
+  <text x="326" y="260" text-anchor="middle" class="sub">质量与显存最佳平衡</text>
+  <text x="326" y="278" text-anchor="middle" class="mono">Llama 3 70B: 320 KB/tok</text>
+
+  <!-- 3. MQA -->
+  <rect x="436" y="50" width="192" height="242" rx="8" class="card"/>
+  <text x="532" y="73" text-anchor="middle" class="h">MQA（全共享）</text>
+  <text x="532" y="90" text-anchor="middle" class="sub">H_kv = 1</text>
+  <g transform="translate(450,104)">
+    <rect x="0" y="0" width="34" height="20" rx="3" class="q"/><text x="17" y="14" text-anchor="middle" class="lbl">Q1</text>
+    <rect x="42" y="0" width="34" height="20" rx="3" class="q"/><text x="59" y="14" text-anchor="middle" class="lbl">Q2</text>
+    <rect x="84" y="0" width="34" height="20" rx="3" class="q"/><text x="101" y="14" text-anchor="middle" class="lbl">Q3</text>
+    <rect x="126" y="0" width="34" height="20" rx="3" class="q"/><text x="143" y="14" text-anchor="middle" class="lbl">Q4</text>
+
+    <rect x="54" y="34" width="52" height="20" rx="3" class="k"/><text x="80" y="48" text-anchor="middle" class="lbl">K_all</text>
+    <rect x="54" y="60" width="52" height="20" rx="3" class="v"/><text x="80" y="74" text-anchor="middle" class="lbl">V_all</text>
+  </g>
+  <text x="532" y="216" text-anchor="middle" class="mono">每层缓存：2 × D</text>
+  <text x="532" y="242" text-anchor="middle" class="sub">全部 Q 头共用 1 组 K、V</text>
+  <text x="532" y="260" text-anchor="middle" class="sub">TP 下无法切分只能多卡复制</text>
+  <text x="532" y="278" text-anchor="middle" class="mono">缓存缩至 1 / H_q</text>
+
+  <!-- 4. MLA -->
+  <rect x="642" y="50" width="194" height="242" rx="8" class="card"/>
+  <text x="739" y="73" text-anchor="middle" class="h">MLA（低秩潜变量）</text>
+  <text x="739" y="90" text-anchor="middle" class="sub">DeepSeek-V2 / V3</text>
+  <g transform="translate(658,104)">
+    <rect x="0" y="0" width="162" height="24" rx="4" class="q"/>
+    <text x="81" y="16" text-anchor="middle" class="lbl">推理时矩阵吸收 / 上投影恢复</text>
+
+    <rect x="8" y="40" width="96" height="36" rx="5" class="lat"/>
+    <text x="56" y="56" text-anchor="middle" class="lbl">潜向量 c_t^KV</text>
+    <text x="56" y="70" text-anchor="middle" class="mono">d_c = 512</text>
+
+    <rect x="110" y="40" width="46" height="36" rx="5" class="k"/>
+    <text x="133" y="56" text-anchor="middle" class="lbl">k_t^R</text>
+    <text x="133" y="70" text-anchor="middle" class="mono">64</text>
+  </g>
+  <text x="739" y="216" text-anchor="middle" class="mono">每层缓存：d_c + d_r = 576</text>
+  <text x="739" y="242" text-anchor="middle" class="sub">不直接存多头 K/V，只存压缩态</text>
+  <text x="739" y="260" text-anchor="middle" class="sub">需专用融合 Kernel（FlashMLA）</text>
+  <text x="739" y="278" text-anchor="middle" class="mono">DeepSeek-V3: ~70 KB/tok</text>
+</svg>

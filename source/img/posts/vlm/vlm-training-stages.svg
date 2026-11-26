@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 255" width="100%" role="img" aria-label="VLM 三阶段训练的模块冻结与解冻策略">
+  <defs>
+    <style>
+      .bg { fill: #ffffff; stroke: #dde5ef; stroke-width: 1; }
+      .title { font: 600 15px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #213954; }
+      .h { font: 600 12.5px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #213954; }
+      .lbl { font: 600 12px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #252525; }
+      .sub { font: 400 11px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; fill: #526478; }
+      .frozen { fill: #eef2f7; stroke: #94a3b8; stroke-width: 1; stroke-dasharray: 4,3; }
+      .train { fill: #cfe8db; stroke: #3e8363; stroke-width: 1.2; }
+      .opt { fill: #f7e5c3; stroke: #a87b2d; stroke-width: 1.1; }
+      .hdr { fill: #f3f6fb; stroke: #d8e2ee; stroke-width: 1; }
+    </style>
+  </defs>
+
+  <rect x="1" y="1" width="858" height="253" rx="10" class="bg"/>
+  <text x="24" y="32" class="title">三阶段训练中各模块的参数状态：从“对齐接口”到“释放能力”</text>
+
+  <!-- Header row -->
+  <rect x="24" y="48" width="180" height="32" rx="5" class="hdr"/>
+  <text x="114" y="69" text-anchor="middle" class="h">训练阶段</text>
+  <rect x="212" y="48" width="142" height="32" rx="5" class="hdr"/>
+  <text x="283" y="69" text-anchor="middle" class="h">Vision Encoder</text>
+  <rect x="362" y="48" width="142" height="32" rx="5" class="hdr"/>
+  <text x="433" y="69" text-anchor="middle" class="h">Projector</text>
+  <rect x="512" y="48" width="142" height="32" rx="5" class="hdr"/>
+  <text x="583" y="69" text-anchor="middle" class="h">LLM 主干</text>
+  <rect x="662" y="48" width="174" height="32" rx="5" class="hdr"/>
+  <text x="749" y="69" text-anchor="middle" class="h">核心数据与目标</text>
+
+  <!-- Stage 1 -->
+  <text x="34" y="110" class="h">阶段 1：特征对齐</text>
+  <text x="34" y="126" class="sub">Alignment / Pretrain</text>
+  <rect x="212" y="90" width="142" height="44" rx="6" class="frozen"/>
+  <text x="283" y="116" text-anchor="middle" class="sub">冻结（保留视觉表征）</text>
+  <rect x="362" y="90" width="142" height="44" rx="6" class="train"/>
+  <text x="433" y="116" text-anchor="middle" class="lbl">训练（lr 约 1e-3）</text>
+  <rect x="512" y="90" width="142" height="44" rx="6" class="frozen"/>
+  <text x="583" y="116" text-anchor="middle" class="sub">冻结（防遗忘）</text>
+  <text x="670" y="109" class="sub">图文对描述（如 558K–10M）</text>
+  <text x="670" y="126" class="sub">把视觉特征对齐到词向量空间</text>
+
+  <!-- Stage 2 -->
+  <text x="34" y="164" class="h">阶段 2：指令微调</text>
+  <text x="34" y="180" class="sub">Multimodal SFT</text>
+  <rect x="212" y="144" width="142" height="44" rx="6" class="opt"/>
+  <text x="283" y="164" text-anchor="middle" class="lbl">冻结或低 lr 解冻</text>
+  <text x="283" y="180" text-anchor="middle" class="sub">（如 Qwen2.5-VL 解冻）</text>
+  <rect x="362" y="144" width="142" height="44" rx="6" class="train"/>
+  <text x="433" y="170" text-anchor="middle" class="lbl">训练</text>
+  <rect x="512" y="144" width="142" height="44" rx="6" class="train"/>
+  <text x="583" y="164" text-anchor="middle" class="lbl">训练（lr 约 2e-5）</text>
+  <text x="583" y="180" text-anchor="middle" class="sub">仅对回答 token 算 loss</text>
+  <text x="670" y="163" class="sub">VQA / OCR / 多轮对话 / 推理</text>
+  <text x="670" y="180" class="sub">学会按指令看图并作答</text>
+
+  <!-- Stage 3 -->
+  <text x="34" y="218" class="h">阶段 3：偏好对齐</text>
+  <text x="34" y="234" class="sub">DPO / RLHF（可选）</text>
+  <rect x="212" y="198" width="142" height="40" rx="6" class="frozen"/>
+  <text x="283" y="222" text-anchor="middle" class="sub">通常冻结</text>
+  <rect x="362" y="198" width="142" height="40" rx="6" class="opt"/>
+  <text x="433" y="222" text-anchor="middle" class="sub">可选微调</text>
+  <rect x="512" y="198" width="142" height="40" rx="6" class="train"/>
+  <text x="583" y="222" text-anchor="middle" class="lbl">偏好优化（DPO/PPO）</text>
+  <text x="670" y="216" class="sub">正负回答偏好对 (y_w, y_l)</text>
+  <text x="670" y="233" class="sub">压低幻觉、改善长回答质量</text>
+</svg>
